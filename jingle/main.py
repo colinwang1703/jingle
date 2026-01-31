@@ -167,8 +167,8 @@ def main():
     parser.add_argument(
         '-c', '--config',
         type=str,
-        default='config/jingle.yaml',
-        help='Path to configuration file (default: config/jingle.yaml)'
+        default=None,
+        help='Path to configuration file (default: config/jingle.yaml if exists, else no config)'
     )
     parser.add_argument(
         '--no-hot-reload',
@@ -193,8 +193,19 @@ def main():
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
+    # Determine config path
+    config_path = args.config
+    if config_path is None:
+        # Try default path if it exists
+        default_path = Path('config/jingle.yaml')
+        if default_path.exists():
+            config_path = str(default_path)
+            logger.info(f"Using default config: {config_path}")
+        else:
+            logger.warning("No config file specified and default not found. Running with minimal config.")
+    
     # Create and run application
-    app = JingleApp(config_path=args.config)
+    app = JingleApp(config_path=config_path)
     app.run(
         hot_reload=not args.no_hot_reload,
         reload_interval=args.reload_interval

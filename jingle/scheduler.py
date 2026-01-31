@@ -56,7 +56,12 @@ class MusicScheduler:
                     logger.error(f"Invalid time specification: {time_spec}")
                     return
                 
-                interval = int(parts[1])
+                try:
+                    interval = int(parts[1])
+                except ValueError:
+                    logger.error(f"Invalid interval value: '{parts[1]}' in time specification: {time_spec}")
+                    return
+                
                 unit = parts[2].rstrip('s')  # Remove plural 's'
                 
                 if unit == "hour":

@@ -204,13 +204,14 @@ def trigger_event():
 def main():
     """Run the API server."""
     import argparse
+    from pathlib import Path
     
     parser = argparse.ArgumentParser(description='Jingle REST API Server')
     parser.add_argument(
         '-c', '--config',
         type=str,
-        default='config/jingle.yaml',
-        help='Path to configuration file'
+        default=None,
+        help='Path to configuration file (default: config/jingle.yaml if exists, else no config)'
     )
     parser.add_argument(
         '-H', '--host',
@@ -227,8 +228,19 @@ def main():
     
     args = parser.parse_args()
     
+    # Determine config path
+    config_path = args.config
+    if config_path is None:
+        # Try default path if it exists
+        default_path = Path('config/jingle.yaml')
+        if default_path.exists():
+            config_path = str(default_path)
+            logger.info(f"Using default config: {config_path}")
+        else:
+            logger.warning("No config file specified and default not found. Running with minimal config.")
+    
     # Initialize Jingle
-    initialize_jingle(args.config)
+    initialize_jingle(config_path)
     
     # Run Flask app
     logger.info(f"Starting Jingle API server on {args.host}:{args.port}")

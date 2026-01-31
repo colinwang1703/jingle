@@ -4,6 +4,7 @@ Tests for MusicScheduler.
 
 import time
 import pytest
+import schedule
 
 from jingle.scheduler import MusicScheduler
 from jingle.player import AudioPlayer
@@ -11,6 +12,14 @@ from jingle.player import AudioPlayer
 
 class TestMusicScheduler:
     """Test cases for MusicScheduler."""
+    
+    def setup_method(self):
+        """Clear schedules before each test."""
+        schedule.clear()
+    
+    def teardown_method(self):
+        """Clear schedules after each test."""
+        schedule.clear()
     
     def test_init(self):
         """Test scheduler initialization."""
@@ -24,14 +33,14 @@ class TestMusicScheduler:
         scheduler = MusicScheduler()
         scheduler.add_schedule("10:30", "test.mp3")
         schedules = scheduler.get_schedules()
-        assert len(schedules) >= 0  # Schedule was added
+        assert len(schedules) == 1  # Verify schedule was added
     
     def test_add_schedule_interval(self):
         """Test adding interval-based schedule."""
         scheduler = MusicScheduler()
         scheduler.add_schedule("every 1 hour", "test.mp3")
         schedules = scheduler.get_schedules()
-        assert len(schedules) >= 0
+        assert len(schedules) == 1  # Verify schedule was added
     
     def test_add_event_handler(self):
         """Test adding event handler."""
