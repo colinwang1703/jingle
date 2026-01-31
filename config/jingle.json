@@ -1,0 +1,36 @@
+{
+  "player": {
+    "music_dir": "./music",
+    "volume": 0.7
+  },
+  "schedules": [
+    {
+      "time": "08:00",
+      "music": "morning.mp3",
+      "options": {
+        "fade_in": 2.0
+      }
+    },
+    {
+      "time": "12:00",
+      "music": "afternoon.mp3",
+      "options": {
+        "fade_in": 1.0
+      }
+    },
+    {
+      "time": "18:00",
+      "music": "evening.mp3",
+      "options": {
+        "fade_in": 2.0
+      }
+    },
+    {
+      "time": "every 2 hours",
+      "music": "reminder.mp3",
+      "options": {
+        "loops": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# Jingle Configuration File
+# Lightweight timed music playback system
+
+# Player settings
+player:
+  # Directory containing music files
+  music_dir: "./music"
+  
+  # Default volume (0.0 to 1.0)
+  volume: 0.7
+
+# Scheduled playback tasks
+schedules:
+  # Play music at specific time (24-hour format)
+  - time: "08:00"
+    music: "morning.mp3"
+    options:
+      fade_in: 2.0  # Fade in duration in seconds
+  
+  - time: "12:00"
+    music: "afternoon.mp3"
+    options:
+      fade_in: 1.0
+  
+  - time: "18:00"
+    music: "evening.mp3"
+    options:
+      fade_in: 2.0
+  
+  # Play music at intervals
+  - time: "every 2 hours"
+    music: "reminder.mp3"
+    options:
+      loops: 0  # Play once (0), or -1 for infinite loop
+  
+  # Another interval example
+  - time: "every 30 minutes"
+    music: "chime.mp3"
+    options:
+      fade_in: 0.5
+      fade_out: 0.5
+
+# Environment variable overrides:
+# - JINGLE_VOLUME: Override volume setting
+# - JINGLE_MUSIC_DIR: Override music directory
