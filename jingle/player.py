@@ -143,11 +143,12 @@ class AudioPlayer:
         Args:
             volume: Volume level (0.0 to 1.0)
         """
-        if not self._initialized:
-            return
-        
         with self._lock:
             self._volume = max(0.0, min(1.0, volume))
+            
+            if not self._initialized:
+                return
+            
             try:
                 pygame.mixer.music.set_volume(self._volume)
                 logger.debug(f"Volume set to {self._volume}")
