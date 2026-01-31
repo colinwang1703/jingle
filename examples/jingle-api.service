@@ -1,0 +1,23 @@
+[Unit]
+Description=Jingle API Server
+After=sound.target network.target
+Wants=sound.target network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/jingle
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/python3 -m jingle.api -c /home/pi/jingle/config/jingle.yaml -H 0.0.0.0 -p 5000
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening (optional)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -27,6 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             'jingle=jingle.main:main',
+            'jingle-api=jingle.api:main',
         ],
     },
     classifiers=[

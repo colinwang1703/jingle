@@ -189,22 +189,141 @@ scheduler.add_event_handler("sensor_trigger", on_sensor_trigger)
 scheduler.trigger_event("sensor_trigger")
 ```
 
+### REST API for Remote Control
+
+Jingle includes a REST API for remote control and dynamic configuration:
+
+**Install API dependencies:**
+```bash
+pip3 install -r requirements-api.txt
+```
+
+**Start the API server:**
+```bash
+# Start API server
+python3 -m jingle.api -c config/jingle.yaml -H 0.0.0.0 -p 5000
+
+# Or with custom settings
+python3 -m jingle.api --host 0.0.0.0 --port 8080 --config config/jingle.yaml
+```
+
+**API Endpoints:**
+
+- `GET /api/status` - Get current status
+- `POST /api/play` - Play music immediately
+  ```json
+  {"music": "song.mp3", "fade_in": 1.0, "loops": 0}
+  ```
+- `POST /api/stop` - Stop playback
+  ```json
+  {"fade_out": 1.0}
+  ```
+- `POST /api/pause` - Pause playback
+- `POST /api/resume` - Resume playback
+- `GET /api/volume` - Get current volume
+- `POST /api/volume` - Set volume
+  ```json
+  {"volume": 0.8}
+  ```
+- `GET /api/schedules` - Get all schedules
+- `POST /api/schedules` - Add new schedule
+  ```json
+  {"time": "every 1 hour", "music": "chime.mp3", "options": {"fade_in": 0.5}}
+  ```
+- `DELETE /api/schedules` - Clear all schedules
+- `GET /api/music/list` - List available music files
+- `POST /api/event` - Trigger custom event
+  ```json
+  {"event": "sensor_trigger"}
+  ```
+
+**Example API usage (with curl):**
+```bash
+# Play music
+curl -X POST http://localhost:5000/api/play \
+  -H "Content-Type: application/json" \
+  -d '{"music": "morning.mp3", "fade_in": 2.0}'
+
+# Set volume
+curl -X POST http://localhost:5000/api/volume \
+  -H "Content-Type: application/json" \
+  -d '{"volume": 0.5}'
+
+# Add schedule
+curl -X POST http://localhost:5000/api/schedules \
+  -H "Content-Type: application/json" \
+  -d '{"time": "every 30 minutes", "music": "chime.mp3"}'
+
+# Get status
+curl http://localhost:5000/api/status
+```
+
+**Python API client example:**
+```python
+import requests
+
+# Play music
+response = requests.post('http://localhost:5000/api/play',
+    json={'music': 'morning.mp3', 'fade_in': 2.0})
+print(response.json())
+
+# Set volume
+response = requests.post('http://localhost:5000/api/volume',
+    json={'volume': 0.8})
+print(response.json())
+```
+
+See `examples/api_client_example.py` for a complete example.
+
 ### Running as a System Service
+
+**Basic Service** (without API):
 
 Create a systemd service file (`/etc/systemd/system/jingle.service`):
 
 ```ini
 [Unit]
-Description=Jingle Music Player
-After=sound.target
+Description=Jingle Music Player Service
+After=sound.target network.target
+Wants=sound.target
 
 [Service]
 Type=simple
 User=pi
+Group=pi
 WorkingDirectory=/home/pi/jingle
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 ExecStart=/usr/bin/python3 -m jingle.main -c /home/pi/jingle/config/jingle.yaml
 Restart=on-failure
 RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**API Service** (with REST API):
+
+Create a systemd service file (`/etc/systemd/system/jingle-api.service`):
+
+```ini
+[Unit]
+Description=Jingle API Server
+After=sound.target network.target
+Wants=sound.target network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/jingle
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/python3 -m jingle.api -c /home/pi/jingle/config/jingle.yaml -H 0.0.0.0 -p 5000
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
@@ -212,9 +331,26 @@ WantedBy=multi-user.target
 
 Enable and start the service:
 ```bash
+# Copy service file
+sudo cp examples/jingle.service /etc/systemd/system/
+
+# Or for API version
+sudo cp examples/jingle-api.service /etc/systemd/system/
+
+# Reload systemd
 sudo systemctl daemon-reload
+
+# Enable service to start on boot
 sudo systemctl enable jingle.service
+
+# Start service
 sudo systemctl start jingle.service
+
+# Check status
+sudo systemctl status jingle.service
+
+# View logs
+sudo journalctl -u jingle.service -f
 ```
 
 ## Supported Audio Formats
