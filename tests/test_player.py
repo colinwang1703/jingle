@@ -28,6 +28,9 @@ class TestAudioPlayer:
         - Improved stability on embedded/resource-constrained devices
         - Reduced buffer underruns
         """
+        # Save original SDL_AUDIODRIVER if it exists
+        original_driver = os.environ.get('SDL_AUDIODRIVER')
+        
         # Use dummy audio driver for testing environments without audio devices
         os.environ['SDL_AUDIODRIVER'] = 'dummy'
         
@@ -36,7 +39,7 @@ class TestAudioPlayer:
             player = AudioPlayer()
             
             # Verify initialization succeeded
-            assert player._initialized == True
+            assert player._initialized
             
             # Get mixer settings (requires pygame mixer to be initialized)
             mixer_freq = pygame.mixer.get_init()[0]
@@ -44,8 +47,10 @@ class TestAudioPlayer:
             # Verify frequency is 44100 Hz (CD quality standard)
             assert mixer_freq == 44100, f"Expected frequency 44100 Hz, got {mixer_freq} Hz"
         finally:
-            # Clean up
-            if 'SDL_AUDIODRIVER' in os.environ:
+            # Restore original value or remove if it didn't exist
+            if original_driver is not None:
+                os.environ['SDL_AUDIODRIVER'] = original_driver
+            elif 'SDL_AUDIODRIVER' in os.environ:
                 del os.environ['SDL_AUDIODRIVER']
     
     def test_volume_bounds(self):
