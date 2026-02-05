@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 import pytest
 
-from jingle.config import ConfigManager
+from jingle.config import ConfigManager, ConfigError
 
 
 class TestConfigManager:
@@ -121,6 +121,170 @@ class TestConfigManager:
         assert 'key1' in config
         assert 'key2' in config
         assert config['key1'] == 'value1'
+    
+    def test_v1_config_valid(self):
+        """Test loading valid v1.0 configuration."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '1.0',
+                'config': {
+                    'music_dir': '/music',
+                    'default_volume': 0.8,
+                    'fade_in_duration': 2.0,
+                    'fade_out_duration': 2.0
+                },
+                'schedules': {
+                    'test_schedule': {
+                        'days': ['weekday'],
+                        'times': ['08:00', '12:00'],
+                        'mode': {
+                            'type': 'random',
+                            'playlist': ['test.mp3'],
+                            'play_count': 1
+                        }
+                    }
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            manager = ConfigManager(config_path)
+            assert manager.get('version') == '1.0'
+            assert manager.get('config.music_dir') == '/music'
+            assert manager.get('config.default_volume') == 0.8
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_missing_version(self):
+        """Test that missing version declaration still loads (legacy format)."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'config': {
+                    'music_dir': '/music'
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            manager = ConfigManager(config_path)
+            # Should load without error (treated as legacy format)
+            assert manager.get('config.music_dir') == '/music'
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_invalid_version(self):
+        """Test error on invalid version."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '2.0',
+                'config': {
+                    'music_dir': '/music'
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            with pytest.raises(ConfigError):
+                manager = ConfigManager(config_path)
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_missing_music_dir(self):
+        """Test error when music_dir is missing in v1.0."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '1.0',
+                'config': {
+                    'default_volume': 0.8
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            with pytest.raises(ConfigError):
+                manager = ConfigManager(config_path)
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_invalid_schedule(self):
+        """Test error on invalid schedule format."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '1.0',
+                'config': {
+                    'music_dir': '/music'
+                },
+                'schedules': {
+                    'test_schedule': {
+                        'days': ['weekday'],
+                        'times': ['08:00'],
+                        # Missing mode section
+                    }
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            with pytest.raises(ConfigError):
+                manager = ConfigManager(config_path)
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_empty_playlist(self):
+        """Test error on empty playlist."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '1.0',
+                'config': {
+                    'music_dir': '/music'
+                },
+                'schedules': {
+                    'test_schedule': {
+                        'days': ['weekday'],
+                        'times': ['08:00'],
+                        'mode': {
+                            'type': 'random',
+                            'playlist': [],  # Empty playlist
+                            'play_count': 1
+                        }
+                    }
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            with pytest.raises(ConfigError):
+                manager = ConfigManager(config_path)
+        finally:
+            os.unlink(config_path)
+    
+    def test_v1_config_invalid_day(self):
+        """Test error on invalid day specification."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            yaml.dump({
+                'version': '1.0',
+                'config': {
+                    'music_dir': '/music'
+                },
+                'schedules': {
+                    'test_schedule': {
+                        'days': ['invalidday'],
+                        'times': ['08:00'],
+                        'mode': {
+                            'type': 'random',
+                            'playlist': ['test.mp3'],
+                            'play_count': 1
+                        }
+                    }
+                }
+            }, f)
+            config_path = f.name
+        
+        try:
+            with pytest.raises(ConfigError):
+                manager = ConfigManager(config_path)
+        finally:
+            os.unlink(config_path)
 
 
 if __name__ == '__main__':
