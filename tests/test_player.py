@@ -6,6 +6,7 @@ import os
 import tempfile
 from pathlib import Path
 import pytest
+import pygame
 
 from jingle.player import AudioPlayer
 
@@ -18,6 +19,34 @@ class TestAudioPlayer:
         player = AudioPlayer(music_dir="/tmp", volume=0.5)
         assert player.music_dir == "/tmp"
         assert player.get_volume() == 0.5
+    
+    def test_audio_initialization_parameters(self):
+        """Test that pygame mixer is initialized with correct parameters.
+        
+        Uses standard 44.1kHz sampling rate and 4096 buffer size for:
+        - Better audio quality (CD standard)
+        - Improved stability on embedded/resource-constrained devices
+        - Reduced buffer underruns
+        """
+        # Use dummy audio driver for testing environments without audio devices
+        os.environ['SDL_AUDIODRIVER'] = 'dummy'
+        
+        try:
+            # Initialize player which initializes pygame mixer
+            player = AudioPlayer()
+            
+            # Verify initialization succeeded
+            assert player._initialized == True
+            
+            # Get mixer settings (requires pygame mixer to be initialized)
+            mixer_freq = pygame.mixer.get_init()[0]
+            
+            # Verify frequency is 44100 Hz (CD quality standard)
+            assert mixer_freq == 44100, f"Expected frequency 44100 Hz, got {mixer_freq} Hz"
+        finally:
+            # Clean up
+            if 'SDL_AUDIODRIVER' in os.environ:
+                del os.environ['SDL_AUDIODRIVER']
     
     def test_volume_bounds(self):
         """Test volume is bounded between 0.0 and 1.0."""

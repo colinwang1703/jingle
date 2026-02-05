@@ -33,9 +33,11 @@ class AudioPlayer:
         self._lock = threading.RLock()
         self._initialized = False
         
-        # Initialize pygame mixer with low buffer for minimal latency
+        # Initialize pygame mixer with standard parameters for stability
+        # Using 44.1kHz (CD quality) and larger buffer (4096) to prevent
+        # buffer underruns on embedded/resource-constrained devices
         try:
-            pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
+            pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
             self._initialized = True
             pygame.mixer.music.set_volume(self._volume)
             logger.info("Audio player initialized")
