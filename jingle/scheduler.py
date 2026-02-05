@@ -257,8 +257,6 @@ class MusicScheduler:
         Returns:
             List of time strings (HH:MM)
         """
-        from datetime import datetime, timedelta
-        
         # Parse start and end times
         start_time = datetime.strptime(start, "%H:%M")
         end_time = datetime.strptime(end, "%H:%M")
@@ -335,8 +333,8 @@ class MusicScheduler:
             
             # Get playback options
             volume = mode.get('volume')
-            fade_in = mode.get('fade_in', mode.get('fade_in_duration', 0.0))
-            fade_out = mode.get('fade_out', mode.get('fade_out_duration', 0.0))
+            fade_in = mode.get('fade_in', 0.0)
+            fade_out = mode.get('fade_out', 0.0)
             
             # Play tracks
             logger.info(f"Playing {len(tracks_to_play)} track(s) from schedule '{schedule_name}'")
