@@ -5,8 +5,10 @@ A lightweight timed music playback system designed for resource-constrained devi
 ## Features
 
 - **Minimal Resource Usage**: Optimized for low-spec hardware, preventing crashes and lag
-- **Flexible Configuration**: Support for YAML/JSON config files and environment variables
+- **Flexible Configuration**: Support for Configuration v1.0 with multiple time formats, plus legacy YAML/JSON
 - **Hot-Reload**: Update configuration without restarting the service
+- **Multiple Time Formats**: Simple time points, time ranges, complex schedules, and compact strings
+- **Global Playlists**: Define reusable playlists across schedules
 - **Extensible Scheduling**: Time-based and event-driven triggers
 - **Modular Design**: Clean separation of concerns for easy maintenance and extension
 
@@ -39,13 +41,51 @@ pip3 install -e .
 
 ## Quick Start
 
+### Using Configuration v1.0 (Recommended)
+
 1. Create a music directory and add your audio files:
 ```bash
 mkdir music
 # Copy your music files to the music directory
 ```
 
-2. Configure your playback schedule by editing `config/jingle.yaml`:
+2. Create a v1.0 configuration file (`config/jingle_v1.yaml`):
+```yaml
+version: "1.0"
+
+config:
+  music_dir: "./music"
+  default_volume: 0.8
+  fade_in_duration: 2.0
+  fade_out_duration: 2.0
+
+schedules:
+  morning_bells:
+    description: "Morning wake-up bells"
+    days: ["weekday"]
+    times: ["08:00", "08:30", "09:00"]
+    mode:
+      type: "random"
+      playlist: ["bell.mp3"]
+      play_count: 1
+
+playlists:
+  morning_bells:
+    - "bell_gentle.mp3"
+    - "bell_bright.mp3"
+```
+
+3. Run Jingle:
+```bash
+jingle -c config/jingle_v1.yaml
+```
+
+**📖 See [CONFIG_V1_SPEC.md](CONFIG_V1_SPEC.md) for complete Configuration v1.0 documentation.**
+
+### Using Legacy Configuration (Still Supported)
+
+You can still use the legacy configuration format:
+
 ```yaml
 player:
   music_dir: "./music"
@@ -61,18 +101,25 @@ schedules:
     music: "reminder.mp3"
 ```
 
-3. Run Jingle:
+Run with:
 ```bash
-# Using the installed command
 jingle -c config/jingle.yaml
-
-# Or run directly
-python3 -m jingle.main -c config/jingle.yaml
 ```
 
 ## Configuration
 
-### Configuration File Format
+### Configuration v1.0 (Recommended)
+
+Configuration v1.0 provides a more powerful and flexible format with:
+- **Four time specification formats** for different use cases
+- **Day specifications** (weekday, weekend, all, ranges, specific days)
+- **Global playlists** for reusability
+- **Random play mode** with track selection
+- **Per-schedule audio options** (volume, fade in/out)
+
+See [CONFIG_V1_SPEC.md](CONFIG_V1_SPEC.md) for complete documentation and examples.
+
+### Legacy Configuration Format
 
 Jingle supports both YAML and JSON configuration files.
 
