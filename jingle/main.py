@@ -55,24 +55,48 @@ class JingleApp:
     def initialize(self):
         """Initialize application components."""
         try:
-            # Initialize audio player
-            music_dir = self.config_manager.get('player.music_dir', os.getcwd())
-            volume = self.config_manager.get('player.volume', 0.7)
+            config_all = self.config_manager.get_all()
             
-            self.player = AudioPlayer(music_dir=music_dir, volume=volume)
+            # Check if using v1.0 configuration format
+            is_v1 = config_all.get('version') == "1.0"
             
-            # Initialize scheduler
-            self.scheduler = MusicScheduler(player=self.player)
-            
-            # Load schedules from config
-            schedules = self.config_manager.get('schedules', [])
-            for sched in schedules:
-                time_spec = sched.get('time')
-                music_file = sched.get('music')
-                options = sched.get('options', {})
+            if is_v1:
+                # Configuration v1.0 format
+                config_section = config_all.get('config', {})
+                music_dir = config_section.get('music_dir', os.getcwd())
+                volume = config_section.get('default_volume', 0.8)
                 
-                if time_spec and music_file:
-                    self.scheduler.add_schedule(time_spec, music_file, **options)
+                self.player = AudioPlayer(music_dir=music_dir, volume=volume)
+                
+                # Initialize scheduler with full config for v1.0
+                self.scheduler = MusicScheduler(player=self.player, config=config_all)
+                
+                # Load schedules from v1.0 format
+                schedules = config_all.get('schedules', {})
+                if isinstance(schedules, dict):
+                    for schedule_name, schedule_config in schedules.items():
+                        self.scheduler.add_schedule_v1(schedule_name, schedule_config)
+                else:
+                    logger.warning("Schedules should be a dictionary in v1.0 format")
+            else:
+                # Legacy format
+                music_dir = self.config_manager.get('player.music_dir', os.getcwd())
+                volume = self.config_manager.get('player.volume', 0.7)
+                
+                self.player = AudioPlayer(music_dir=music_dir, volume=volume)
+                
+                # Initialize scheduler
+                self.scheduler = MusicScheduler(player=self.player)
+                
+                # Load schedules from legacy format
+                schedules = self.config_manager.get('schedules', [])
+                for sched in schedules:
+                    time_spec = sched.get('time')
+                    music_file = sched.get('music')
+                    options = sched.get('options', {})
+                    
+                    if time_spec and music_file:
+                        self.scheduler.add_schedule(time_spec, music_file, **options)
             
             logger.info("Application initialized successfully")
             return True
@@ -125,20 +149,39 @@ class JingleApp:
             # Clear existing schedules
             self.scheduler.clear_schedules()
             
-            # Update player settings
-            volume = self.config_manager.get('player.volume', 0.7)
-            if self.player:
-                self.player.set_volume(volume)
+            config_all = self.config_manager.get_all()
+            is_v1 = config_all.get('version') == "1.0"
             
-            # Reload schedules
-            schedules = self.config_manager.get('schedules', [])
-            for sched in schedules:
-                time_spec = sched.get('time')
-                music_file = sched.get('music')
-                options = sched.get('options', {})
+            if is_v1:
+                # Update player settings from v1.0 config
+                config_section = config_all.get('config', {})
+                volume = config_section.get('default_volume', 0.8)
+                if self.player:
+                    self.player.set_volume(volume)
                 
-                if time_spec and music_file:
-                    self.scheduler.add_schedule(time_spec, music_file, **options)
+                # Update playlists
+                self.scheduler._playlists = config_all.get('playlists', {})
+                
+                # Reload schedules from v1.0 format
+                schedules = config_all.get('schedules', {})
+                if isinstance(schedules, dict):
+                    for schedule_name, schedule_config in schedules.items():
+                        self.scheduler.add_schedule_v1(schedule_name, schedule_config)
+            else:
+                # Legacy format
+                volume = self.config_manager.get('player.volume', 0.7)
+                if self.player:
+                    self.player.set_volume(volume)
+                
+                # Reload schedules from legacy format
+                schedules = self.config_manager.get('schedules', [])
+                for sched in schedules:
+                    time_spec = sched.get('time')
+                    music_file = sched.get('music')
+                    options = sched.get('options', {})
+                    
+                    if time_spec and music_file:
+                        self.scheduler.add_schedule(time_spec, music_file, **options)
             
             logger.info("Schedules reloaded successfully")
             

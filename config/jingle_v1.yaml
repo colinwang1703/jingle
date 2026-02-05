@@ -1,0 +1,125 @@
+# Jingle Configuration v1.0
+# Complete example demonstrating all time specification formats
+
+version: "1.0"
+
+config:
+  music_dir: "./music"
+  default_volume: 0.8
+  fade_in_duration: 2.0
+  fade_out_duration: 2.0
+
+schedules:
+  # Format 1: Simple time points for school bells
+  school_bells:
+    description: "Elementary school daily bells"
+    days: ["weekday"]
+    times: ["08:30", "09:15", "10:00", "10:45", "11:30", "12:15", "13:00", "13:45", "14:30"]
+    mode:
+      type: "random"
+      playlist: ["school_bells"]
+      play_count: 1
+
+  # Format 2: Time range for office reminders
+  office_reminders:
+    description: "Hourly reminders during work hours"
+    days: ["weekday"]
+    time_range:
+      start: "09:00"
+      end: "18:00"
+      interval: 60
+    mode:
+      type: "random"
+      playlist: ["reminder_soft.mp3"]
+      play_count: 1
+      volume: 0.6
+
+  # Format 3: Complex schedule for varied weekly timetable
+  weekly_program:
+    description: "Different times on different days"
+    times:
+      - days: ["monday", "wednesday"]
+        points: ["07:00", "12:00", "19:00"]
+      - days: ["tuesday", "thursday"]
+        points: ["08:00", "13:00", "20:00"]
+      - days: ["friday"]
+        points: ["09:00", "17:00"]
+      - days: ["weekend"]
+        points: ["10:00", "15:00", "21:00"]
+    mode:
+      type: "random"
+      playlist: ["background_music"]
+      play_count: 2
+      fade_in: 5.0
+
+  # Format 4: Compact strings for quick configuration
+  quick_setup:
+    description: "Using compact schedule strings"
+    schedule:
+      - "monday,wednesday,friday 08:00"
+      - "tuesday,thursday 09:00"
+      - "saturday 10:00"
+      - "sunday 11:00"
+    mode:
+      type: "random"
+      playlist: ["weekend_mix"]
+      play_count: 3
+
+  # Example with day ranges
+  morning_routine:
+    description: "Morning routine Monday through Friday"
+    days: "monday-friday"
+    times: ["06:00", "06:30", "07:00"]
+    mode:
+      type: "random"
+      playlist: ["morning_bells"]
+      play_count: 1
+      volume: 0.7
+      fade_in: 3.0
+
+  # Example with "all" days
+  daily_chime:
+    description: "Daily noon chime"
+    days: "all"
+    times: ["12:00"]
+    mode:
+      type: "random"
+      playlist: ["chime.mp3"]
+      play_count: 1
+
+  # Example with weekend shortcut
+  weekend_music:
+    description: "Relaxing music on weekends"
+    days: "weekend"
+    times: ["10:00", "14:00", "18:00"]
+    mode:
+      type: "random"
+      playlist: ["weekend_mix"]
+      play_count: 2
+      fade_in: 4.0
+      fade_out: 4.0
+
+playlists:
+  school_bells:
+    - "bell_short.mp3"
+    - "bell_medium.mp3"
+    - "bell_long.mp3"
+  
+  background_music:
+    - "ambient_calm.mp3"
+    - "jazz_soft.mp3"
+    - "classical_light.mp3"
+  
+  weekend_mix:
+    - "relaxing_1.mp3"
+    - "upbeat_2.mp3"
+    - "chill_3.mp3"
+  
+  morning_bells:
+    - "bell_gentle.mp3"
+    - "bell_bright.mp3"
+    - "bell_chime.mp3"
+
+# Environment variable overrides:
+# - JINGLE_VOLUME: Override default_volume setting
+# - JINGLE_MUSIC_DIR: Override music_dir
