@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# 配置
+APP_DIR="/opt/jingle"
+CHECK_INTERVAL=60
+SERVICES=("jingle-main" "jingle-web")
+LOG_FILE="/var/log/jingled.log"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+check_services() {
+    for svc in "${SERVICES[@]}"; do
+        if ! systemctl is-active --quiet "$svc"; then
+            log "Service $svc is not active."
+            return 1
+        fi
+    done
+    return 0
+}
+
+restart_services() {
+    log "Restarting services: ${SERVICES[*]}"
+    systemctl restart "${SERVICES[@]}"
+    sleep 10 # 等待启动
+    
+    # 检查启动状态
+    if check_services; then
+        log "Services restarted successfully."
+        return 0
+    else
+        log "Services failed to start."
+        return 1
+    fi
+}
+
+# 确保在正确目录
+if [ -d "$APP_DIR" ]; then
+    cd "$APP_DIR"
+else
+    log "Error: APP_DIR $APP_DIR does not exist."
+    exit 1
+fi
+
+# 初始检查
+if ! command -v git &> /dev/null; then
+    log "Error: git is not installed."
+    exit 1
+fi
+
+log "Jingled started. Watching for git updates..."
+
+while true; do
+    # 确保我们在正确的分支上
+    git fetch origin
+    
+    # 获取本地和远程的 commit hash
+    LOCAL=$(git rev-parse HEAD)
+    REMOTE=$(git rev-parse @{u} 2>/dev/null)
+    
+    if [ -z "$REMOTE" ]; then
+        log "Warning: Cannot get remote HEAD. Network issue or upstream not set?"
+    elif [ "$LOCAL" != "$REMOTE" ]; then
+        log "Update found. Local: ${LOCAL:0:7}, Remote: ${REMOTE:0:7}"
+        
+        # 尝试更新
+        if git pull; then
+            log "Git pull successful. Attempting to restart services..."
+            
+            # 尝试重启
+            ATTEMPT=1
+            MAX_ATTEMPTS=3
+            SUCCESS=false
+            
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+                if restart_services; then
+                    SUCCESS=true
+                    break
+                fi
+                log "Restart attempt $ATTEMPT failed."
+                ((ATTEMPT++))
+                sleep 5
+            done
+            
+            if [ "$SUCCESS" = false ]; then
+                log "All restart attempts failed. Rolling back to $LOCAL..."
+                # 回滚
+                git reset --hard "$LOCAL"
+                # 再次尝试重启（使用旧代码）
+                if restart_services; then
+                    log "Rollback and restart successful."
+                else
+                    log "Critical: Rollback succeeded but services still failed to start."
+                fi
+            else
+                log "Update deployed successfully."
+            fi
+        else
+            log "Git pull failed."
+        fi
+    fi
+    
+    sleep "$CHECK_INTERVAL"
+done

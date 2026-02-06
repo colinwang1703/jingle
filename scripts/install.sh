@@ -2,7 +2,7 @@
 
 # 配置变量
 INSTALL_DIR="/opt/jingle"
-VENV_DIR="$INSTALL_DIR/env"
+VENV_DIR="$INSTALL_DIR/.venv"
 USER_RUN="root" # 建议使用 root 运行以确保音频设备访问权限，或者使用 audio 组用户
 
 # 颜色定义

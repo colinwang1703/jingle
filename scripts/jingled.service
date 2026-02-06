@@ -1,0 +1,14 @@
+[Unit]
+Description=Jingle Git Auto-Updater Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/jingle
+ExecStart=/bin/bash /opt/jingle/scripts/jingled
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
