@@ -1,0 +1,20 @@
+# Ignore media files
+media/*.mp3
+media/*.wav
+media/*.ogg
+music/
+
+# Python
+__pycache__/
+*.pyc
+env/
+venv/
+.env
+
+# Logs
+*.log
+
+# Editor
+.trae/
+.vscode/
+.idea/
