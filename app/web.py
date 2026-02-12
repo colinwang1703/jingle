@@ -197,18 +197,31 @@ def upload_file():
     if 'file' not in request.files:
         return redirect(url_for('index'))
     
-    file = request.files['file']
-    if file.filename == '':
+    files = request.files.getlist('file')
+    if not files or all(f.filename == '' for f in files):
         return redirect(url_for('index'))
+    
+    uploaded_count = 0
+    errors = []
+    
+    MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+    
+    for file in files:
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            try:
+                file.save(MEDIA_DIR / filename)
+                uploaded_count += 1
+            except Exception as e:
+                errors.append(f"{filename}: {e}")
+        elif file.filename:
+             errors.append(f"{file.filename}: 不支持的文件类型")
+            
+    if uploaded_count > 0:
+        flash(f'成功上传 {uploaded_count} 个文件', 'success')
         
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        MEDIA_DIR.mkdir(parents=True, exist_ok=True)
-        try:
-            file.save(MEDIA_DIR / filename)
-            flash(f'成功上传: {filename}', 'success')
-        except Exception as e:
-            flash(f'上传失败: {e}', 'error')
+    if errors:
+        flash(f'上传遇到问题: {"; ".join(errors)}', 'error')
         
     return redirect(url_for('index'))
 
