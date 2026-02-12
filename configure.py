@@ -16,8 +16,9 @@ sys.path.append(os.getcwd())
 
 try:
     from app.main import BellScheduler
-except ImportError:
-    print("错误: 无法导入 app.main。请确保在项目根目录下运行此脚本。")
+except ImportError as e:
+    print(f"错误: 无法导入 app.main。\n详细错误信息: {e}")
+    print("提示: 如果使用了 sudo，请确保指向虚拟环境的 python，例如: sudo .venv/bin/python configure.py")
     sys.exit(1)
 
 # 配置日志，避免 app.main 的日志干扰太多，但保留错误信息

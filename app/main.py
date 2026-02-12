@@ -10,7 +10,7 @@ import time
 import logging
 import os
 import re
-import random
+import secrets
 import pygame
 import threading
 import glob
@@ -412,7 +412,7 @@ class BellScheduler:
                     bell_to_play = self.should_play_now()
                     if bell_to_play:
                         # 从 filenames 列表中随机选择一个文件
-                        chosen = random.choice(bell_to_play.get('filenames', []))
+                        chosen = secrets.choice(bell_to_play.get('filenames', []))
                         logger.info(f"触发播放: {chosen} (第{bell_to_play['line_num']}行)")
                         self.play_audio(chosen, bell_to_play.get('duration', 0))
                 

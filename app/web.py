@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import os
-import shutil
 import re
-import json
 from pathlib import Path
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
