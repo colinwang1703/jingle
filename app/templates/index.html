@@ -269,7 +269,22 @@
 
                     <!-- Music Selection -->
                     <div class="form-group">
-                        <label class="form-label">🎵 选择音乐 (Music) - 可多选</label>
+                        <label class="form-label">🎵 选择音乐 (Music) - 可多选或输入通配符 (如 jazz_*)</label>
+                        
+                        <!-- Manual Entry Input -->
+                        <div class="add-time-form" style="margin-bottom: 10px;">
+                            <input type="text" v-model="entry.tempFile" class="form-control" placeholder="输入文件名或通配符..." style="padding: 6px; border: 1px solid #ddd; border-radius: 4px; flex-grow: 1;">
+                            <button class="btn btn-sm btn-secondary" @click="addFile(entry)">➕ 添加</button>
+                        </div>
+
+                        <!-- Selected Files Tags -->
+                        <div class="time-tags" style="margin-bottom: 10px;">
+                            <span v-for="(fn, fnIdx) in entry.filenames" :key="fnIdx" class="time-tag" :style="!musicFiles.includes(fn) ? 'background: #fff3cd; color: #856404;' : ''">
+                                [[ fn ]]
+                                <button @click="removeFile(entry, fnIdx)">×</button>
+                            </span>
+                        </div>
+
                         <div class="music-grid">
                             <label v-for="file in musicFiles" :key="file" 
                                    class="checkbox-label" 
@@ -344,6 +359,7 @@
                 entries.value.forEach(e => {
                     e.expanded = false;
                     e.tempTime = '';
+                    e.tempFile = '';
                 });
 
                 const showToast = (msg, type = 'success') => {
@@ -380,6 +396,17 @@
                     entry.times.splice(idx, 1);
                 };
 
+                const addFile = (entry) => {
+                    if (entry.tempFile && !entry.filenames.includes(entry.tempFile)) {
+                        entry.filenames.push(entry.tempFile);
+                        entry.tempFile = '';
+                    }
+                };
+
+                const removeFile = (entry, idx) => {
+                    entry.filenames.splice(idx, 1);
+                };
+
                 const getSummary = (entry) => {
                     let days = '每天';
                     if (entry.days.length > 0) {
@@ -407,7 +434,8 @@
                         times: [],
                         duration: null,
                         expanded: true,
-                        tempTime: ''
+                        tempTime: '',
+                        tempFile: ''
                     });
                 };
 
@@ -457,6 +485,8 @@
                     toggleDay,
                     addTime,
                     removeTime,
+                    addFile,
+                    removeFile,
                     getSummary,
                     toggleExpand,
                     addEntry,

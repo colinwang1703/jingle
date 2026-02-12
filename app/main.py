@@ -13,6 +13,7 @@ import re
 import random
 import pygame
 import threading
+import glob
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 
@@ -215,13 +216,48 @@ class BellScheduler:
 
                 # 解析文件字段（单个文件或方括号列表）
                 file_field = parts[idx]
-                filenames: List[str] = []
+                raw_filenames: List[str] = []
                 if file_field.startswith('[') and file_field.endswith(']'):
                     inner = file_field[1:-1]
                     # 允许方括号内用逗号分隔
-                    filenames = [fn.strip() for fn in inner.split(',') if fn.strip()]
+                    raw_filenames = [fn.strip() for fn in inner.split(',') if fn.strip()]
                 else:
-                    filenames = [file_field]
+                    raw_filenames = [file_field]
+
+                # 处理通配符
+                filenames: List[str] = []
+                # 获取 music 目录路径
+                project_root = Path(self.config_file).parent.parent
+                media_dir = project_root / 'music'
+
+                for fn in raw_filenames:
+                    if '*' in fn or '?' in fn:
+                        # 是通配符模式
+                        try:
+                            # 构造匹配路径
+                            pattern = str(media_dir / fn)
+                            matched_paths = glob.glob(pattern)
+                            if matched_paths:
+                                for p in matched_paths:
+                                    # 只取文件名
+                                    filenames.append(os.path.basename(p))
+                            else:
+                                logger.warning(f"第{line_num}行: 通配符未匹配到任何文件: {fn}")
+                                # 如果没匹配到，仍然添加原始字符串，以便在检查存在性时再次报错（或提示）
+                                filenames.append(fn)
+                        except Exception as e:
+                            logger.warning(f"第{line_num}行: 通配符解析错误 {fn}: {e}")
+                            filenames.append(fn)
+                    else:
+                        filenames.append(fn)
+                
+                # 去重
+                filenames = list(set(filenames))
+                
+                # 如果去重后为空（例如全是不存在的通配符？），则跳过
+                if not filenames:
+                     logger.warning(f"第{line_num}行: 有效文件列表为空")
+                     continue
 
                 idx += 1
 
