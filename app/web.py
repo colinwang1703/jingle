@@ -13,7 +13,7 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parent
 CONFIG_FILE = PROJECT_ROOT / 'config' / 'bells.conf'
 MEDIA_DIR = PROJECT_ROOT / 'music'
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac'}
 
 class ConfigParser:
     """Helper class to parse and stringify bells.conf format"""

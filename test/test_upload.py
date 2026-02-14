@@ -24,7 +24,7 @@ class UploadTestCase(unittest.TestCase):
         # Instead, we can just use the existing MEDIA_DIR but ensure we clean up
         # For safety, let's just use the real MEDIA_DIR but use specific test filenames
         
-        self.test_files = ['test_upload_1.mp3', 'test_upload_2.wav']
+        self.test_files = ['test_upload_1.mp3', 'test_upload_2.wav', 'test_upload_3.flac']
         
         # Create dummy content
         for f in self.test_files:
@@ -63,7 +63,8 @@ class UploadTestCase(unittest.TestCase):
             self.assertTrue((MEDIA_DIR / f).exists(), f"File {f} should exist in {MEDIA_DIR}")
             
         # Check response for success message
-        self.assertIn(b'\xe6\x88\x90\xe5\x8a\x9f\xe4\xb8\x8a\xe4\xbc\xa0 2 \xe4\xb8\xaa\xe6\x96\x87\xe4\xbb\xb6', response.data) # "成功上传 2 个文件" in utf-8
+        # "成功上传 3 个文件" in utf-8
+        self.assertIn(b'\xe6\x88\x90\xe5\x8a\x9f\xe4\xb8\x8a\xe4\xbc\xa0 3 \xe4\xb8\xaa\xe6\x96\x87\xe4\xbb\xb6', response.data)
 
 if __name__ == '__main__':
     unittest.main()
