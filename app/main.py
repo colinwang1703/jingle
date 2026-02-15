@@ -17,6 +17,16 @@ import glob
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 
+# 尝试导入版本号
+try:
+    from app.version import VERSION
+except ImportError:
+    try:
+        import version
+        VERSION = version.VERSION
+    except ImportError:
+        VERSION = "Unknown"
+
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -411,7 +421,7 @@ class BellScheduler:
     
     def run(self):
         """主运行循环"""
-        logger.info("铃声调度器开始运行")
+        logger.info(f"铃声调度器开始运行 (v{VERSION})")
         
         last_checked_minute = -1
         

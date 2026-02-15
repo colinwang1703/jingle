@@ -5,8 +5,23 @@ from pathlib import Path
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
 
+# 尝试导入版本号
+try:
+    from app.version import VERSION
+except ImportError:
+    try:
+        import version
+        VERSION = version.VERSION
+    except ImportError:
+        VERSION = "Unknown"
+
 app = Flask(__name__)
 app.secret_key = 'jingle_bell_secret_key'
+
+# 注入版本号到模板
+@app.context_processor
+def inject_version():
+    return dict(version=VERSION)
 
 # 使用 Pathlib 优化路径处理
 APP_DIR = Path(__file__).resolve().parent
@@ -243,7 +258,7 @@ def delete_file(filename):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    print(f"Starting Web Config server...")
+    print(f"Starting Web Config server (v{VERSION})...")
     print(f"Work Dir: {PROJECT_ROOT}")
     print(f"Please open http://localhost:5000 in your browser")
     app.run(host='0.0.0.0', port=5000)

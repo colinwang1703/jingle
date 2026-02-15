@@ -342,6 +342,10 @@
         <div v-if="toast.show" class="toast" :class="toast.type === 'success' ? 'toast-success' : 'toast-error'">
             [[ toast.message ]]
         </div>
+
+        <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.8em; padding-bottom: 20px;">
+            Jingle Bell Scheduler v{{ version }}
+        </div>
     </div>
 
     <script>
