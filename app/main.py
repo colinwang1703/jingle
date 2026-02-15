@@ -290,7 +290,8 @@ class BellScheduler:
 
                 # 检查文件是否存在（如果文件不存在只发警告）
                 for fn in filenames:
-                    if not os.path.exists(fn):
+                    # 检查路径：1. 绝对路径或相对于CWD 2. 相对于music目录
+                    if not os.path.exists(fn) and not (media_dir / fn).exists():
                         logger.warning(f"第{line_num}行: 音频文件不存在: {fn}")
 
                 # 添加到条目列表，统一使用 filenames 列表
