@@ -72,6 +72,8 @@ class ConfigParser:
             else:
                 # Single file, split by first comma
                 parts = rest.split(',', 1)
+                if not parts[0].strip():
+                     raise ValueError(f"第 {line_num+1} 行格式错误：缺少文件名")
                 entry['filenames'] = [parts[0].strip()]
                 if len(parts) > 1:
                     rest = parts[1]
@@ -81,28 +83,16 @@ class ConfigParser:
             # 3. Parse Duration (optional MM:SS) and Times
             time_parts = [t.strip() for t in rest.split(',') if t.strip()]
             
+            if not time_parts:
+                 raise ValueError(f"第 {line_num+1} 行格式错误：缺少时间点")
+
             for part in time_parts:
-                # Check if it looks like duration (MM:SS) vs time (HH:MM)
-                # Actually in main.py, it distinguishes based on position or format?
-                # main.py logic: if first part matches MM:SS AND there are more parts, it's duration.
-                # Here we simplify: if we haven't found duration and it looks like MM:SS, treat as duration?
-                # But time is also HH:MM. 
-                # Let's strictly follow main.py logic:
-                # If we encounter a part, if it's the first one and followed by others, check if it's duration.
-                # However, users might mix.
-                # Let's assume HH:MM is time. If user sets duration, it's rare.
-                # For this UI, let's treat all HH:MM as time points for now to simplify.
-                # If there's a need for duration control, we can add it later.
-                # Wait, main.py logic:
-                # duration = 0
-                # if idx < len(parts) and re.match(r'^\d{1,2}:\d{2}$', parts[idx]) and (idx + 1) < len(parts):
-                #    duration = parse...
-                # So if there are at least 2 items left, check the first one.
-                # Since we don't have easy way to distinguish 05:00 (duration) vs 05:00 (5am),
-                # We will just treat everything as times in this UI version for simplicity,
-                # unless we see a clear pattern.
-                # To be safe, let's just parse all as times.
-                
+                # Check format HH:MM or MM:SS or -HH:MM
+                # Allow disabled times starting with -
+                check_part = part[1:] if part.startswith('-') else part
+                if not re.match(r'^\d{1,2}:\d{2}$', check_part):
+                     raise ValueError(f"第 {line_num+1} 行时间格式错误：{part}")
+
                 entry['times'].append(part)
                 
             entries.append(entry)
@@ -203,7 +193,35 @@ def index():
     # Pass data as JSON string for Vue to pick up
     return render_template('index.html', 
                          entries=entries, 
-                         music_files=music_files)
+                         music_files=music_files,
+                         raw_content=content)
+
+@app.route('/save_raw', methods=['POST'])
+def save_raw_config():
+    if not request.is_json:
+        return jsonify({'success': False, 'message': 'Invalid request'}), 400
+        
+    try:
+        data = request.get_json()
+        content = data.get('content', '')
+        
+        # 简单的语法检查：尝试解析
+        # 如果解析过程中发现严重格式问题，ConfigParser可能会报错
+        # 但目前的ConfigParser比较宽容，主要跳过错误行
+        # 我们可以检查解析后的条目数量是否合理（可选）
+        ConfigParser.parse(content)
+        
+        # 原子写入
+        tmp_file = CONFIG_FILE.with_suffix('.tmp')
+        CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(tmp_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        os.replace(tmp_file, CONFIG_FILE)
+        return jsonify({'success': True, 'message': '配置已保存'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

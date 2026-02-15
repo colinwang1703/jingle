@@ -338,6 +338,24 @@
             </div>
         </div>
         
+        <!-- Raw Editor Section -->
+        <div class="container">
+            <div class="section-header">
+                <h1>📝 源码编辑 (Raw Editor)</h1>
+            </div>
+            <div class="card">
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
+                    直接编辑 bells.conf 配置文件。保存时会自动检查基本语法。
+                </p>
+                <textarea v-model="rawConfig" style="width: 100%; height: 300px; font-family: monospace; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" spellcheck="false"></textarea>
+                <div style="margin-top: 10px; text-align: right;">
+                    <button @click="saveRawConfig" class="btn btn-primary" :disabled="saving">
+                        💾 保存源码 (Save Raw Config)
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Toast Notification -->
         <div v-if="toast.show" class="toast" :class="toast.type === 'success' ? 'toast-success' : 'toast-error'">
             [[ toast.message ]]
@@ -356,6 +374,7 @@
                 // Initialize data from server template
                 const entries = ref({{ entries | tojson }});
                 const musicFiles = ref({{ music_files | tojson }});
+                const rawConfig = ref({{ raw_content | tojson }});
                 const saving = ref(false);
                 const toast = reactive({ show: false, message: '', type: 'success' });
 
@@ -470,6 +489,33 @@
                         const result = await response.json();
                         if (result.success) {
                             showToast('配置保存成功！');
+                            // Refresh page to sync raw config
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('保存失败: ' + result.message, 'error');
+                        }
+                    } catch (e) {
+                        showToast('网络错误: ' + e, 'error');
+                    } finally {
+                        saving.value = false;
+                    }
+                };
+
+                const saveRawConfig = async () => {
+                    saving.value = true;
+                    try {
+                        const response = await fetch('/save_raw', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ content: rawConfig.value })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            showToast('源码保存成功！');
+                            // Refresh page to sync visual editor
+                            setTimeout(() => location.reload(), 1000);
                         } else {
                             showToast('保存失败: ' + result.message, 'error');
                         }
@@ -483,6 +529,7 @@
                 return {
                     entries,
                     musicFiles,
+                    rawConfig,
                     saving,
                     toast,
                     getDayName,
@@ -496,7 +543,8 @@
                     addEntry,
                     deleteEntry,
                     copyEntry,
-                    saveConfig
+                    saveConfig,
+                    saveRawConfig
                 };
             }
         });
