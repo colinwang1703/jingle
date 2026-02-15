@@ -35,6 +35,7 @@ class BellScheduler:
         self.current_playing: Optional[str] = None
         self.stop_event = threading.Event()
         self.last_modified = 0
+        self.last_music_dir_modified = 0
         self.pygame_initialized = False
         
         # 初始化pygame mixer
@@ -121,12 +122,28 @@ class BellScheduler:
                 logger.error(f"配置文件不存在: {self.config_file}")
                 return False
             
+            # 计算 music 目录路径
+            project_root = Path(self.config_file).parent.parent
+            media_dir = project_root / 'music'
+            
             # 检查文件是否被修改
             current_modified = os.path.getmtime(self.config_file)
-            if current_modified <= self.last_modified:
-                return True  # 文件未修改，不需要重新加载
+            
+            # 检查 music 目录是否被修改 (用于重新扫描通配符)
+            current_music_dir_modified = 0
+            if media_dir.exists():
+                current_music_dir_modified = os.path.getmtime(media_dir)
+
+            if current_modified <= self.last_modified and current_music_dir_modified <= self.last_music_dir_modified:
+                return True  # 文件和目录都未修改，不需要重新加载
+            
+            if current_modified > self.last_modified:
+                logger.info("检测到配置文件修改，重新加载...")
+            elif current_music_dir_modified > self.last_music_dir_modified:
+                logger.info("检测到音乐目录修改，重新扫描...")
             
             self.last_modified = current_modified
+            self.last_music_dir_modified = current_music_dir_modified
             
             # 清空现有条目
             self.bell_entries.clear()
