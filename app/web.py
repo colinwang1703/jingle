@@ -87,10 +87,12 @@ class ConfigParser:
                  raise ValueError(f"第 {line_num+1} 行格式错误：缺少时间点")
 
             for part in time_parts:
-                # Check format HH:MM or MM:SS or -HH:MM
+                # Check format HH:MM or MM:SS or -HH:MM or HH:MM-HH:MM
                 # Allow disabled times starting with -
                 check_part = part[1:] if part.startswith('-') else part
-                if not re.match(r'^\d{1,2}:\d{2}$', check_part):
+                
+                # 正则：支持 HH:MM 或 HH:MM-HH:MM
+                if not re.match(r'^\d{1,2}:\d{2}(-\d{1,2}:\d{2})?$', check_part):
                      raise ValueError(f"第 {line_num+1} 行时间格式错误：{part}")
 
                 entry['times'].append(part)

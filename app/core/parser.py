@@ -106,9 +106,26 @@ class BellParser:
             disabled = time_str.strip().startswith('-')
             check_str = time_str.strip()[1:].strip() if disabled else time_str.strip()
             
+            # 新增：尝试解析时间段 HH:MM-HH:MM
+            range_match = re.match(r'^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$', check_str)
+            if range_match:
+                start_t = self._parse_time(range_match.group(1))
+                end_t = self._parse_time(range_match.group(2))
+                
+                if start_t and end_t:
+                    # 计算持续时间（秒）
+                    start_min = start_t[0] * 60 + start_t[1]
+                    end_min = end_t[0] * 60 + end_t[1]
+                    if end_min < start_min: end_min += 24 * 60  # 跨天处理
+                    
+                    duration_sec = (end_min - start_min) * 60
+                    # 将特定持续时间存入该时间点
+                    times.append({'time': start_t, 'disabled': disabled, 'duration': duration_sec, 'is_range': True})
+                    continue
+
             time_point = self._parse_time(check_str)
             if time_point:
-                times.append({'time': time_point, 'disabled': disabled})
+                times.append({'time': time_point, 'disabled': disabled, 'duration': None, 'is_range': False})
             else:
                  logger.warning(f"第{line_num}行: 时间格式错误 {time_str}")
 

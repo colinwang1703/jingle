@@ -28,11 +28,12 @@ class BellPlayer:
             logger.error(f"音频系统初始化失败: {e}")
             self.pygame_initialized = False
 
-    def play(self, filename: str, duration: int = 0):
+    def play(self, filename: str, duration: int = 0, next_track_callback=None):
         """
         播放音频文件
         :param filename: 文件名或绝对路径
         :param duration: 持续时间（秒），0 表示播放完整文件
+        :param next_track_callback: 播放结束后调用的回调函数（用于循环播放）
         """
         if not self.pygame_initialized:
             logger.error("音频系统未初始化，无法播放")
@@ -52,6 +53,8 @@ class BellPlayer:
             # 检查文件是否存在
             if not file_path.exists():
                 logger.error(f"音频文件不存在: {file_path}")
+                if next_track_callback:
+                    next_track_callback()
                 return
 
             logger.info(f"开始播放: {file_path}")
@@ -60,6 +63,21 @@ class BellPlayer:
             # 加载并播放音频
             pygame.mixer.music.load(str(file_path))
             pygame.mixer.music.play()
+            
+            # 设置音乐结束事件
+            pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)
+            
+            # 监听音乐结束事件
+            def check_music_end():
+                while self.current_playing == str(file_path):
+                    for event in pygame.event.get():
+                        if event.type == pygame.USEREVENT + 1:
+                            if next_track_callback:
+                                next_track_callback()
+                            return
+                    time.sleep(0.1)
+
+            threading.Thread(target=check_music_end, daemon=True).start()
 
             # 设置定时停止（如果指定了持续时间）
             if duration > 0:
