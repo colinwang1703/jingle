@@ -114,14 +114,18 @@ class BellParser:
         idx += 1
 
         # 解析持续时间 (可选)
+        # 注意：由于 MM:SS 和 HH:MM 格式冲突，且 bells.example.conf 中存在 "08:00, 08:50" 这种连续时间配置
+        # 这里必须非常谨慎。目前的策略是：如果使用了 HH:MM-HH:MM 时间段格式，就不需要单独的 duration 字段。
+        # 为了兼容性和避免歧义，暂时禁用单独的 duration 字段解析，或者只允许它是不像时间的值。
+        # 鉴于 range 功能已覆盖时长需求，这里暂时注释掉以修复多时间点解析 Bug。
         duration = 0
-        if idx < len(parts) and re.match(r'^\d{1,2}:\d{2}$', parts[idx]) and (idx + 1) < len(parts):
-            dur = self._parse_duration(parts[idx])
-            if dur is not None:
-                duration = dur
-                idx += 1
-            else:
-                logger.warning(f"第{line_num}行: 持续时间解析失败: {parts[idx]}")
+        # if idx < len(parts) and re.match(r'^\d{1,2}:\d{2}$', parts[idx]) and (idx + 1) < len(parts):
+        #     dur = self._parse_duration(parts[idx])
+        #     if dur is not None:
+        #         duration = dur
+        #         idx += 1
+        #     else:
+        #         logger.warning(f"第{line_num}行: 持续时间解析失败: {parts[idx]}")
 
         # 解析时间点
         times = []
