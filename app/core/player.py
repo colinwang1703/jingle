@@ -21,6 +21,7 @@ class BellPlayer:
     def _init_audio(self):
         """初始化音频系统"""
         try:
+            # 仅初始化音频混合器，避免初始化视频系统
             pygame.mixer.init()
             self.pygame_initialized = True
             logger.info("音频系统初始化成功")
@@ -64,17 +65,16 @@ class BellPlayer:
             pygame.mixer.music.load(str(file_path))
             pygame.mixer.music.play()
             
-            # 设置音乐结束事件
-            pygame.mixer.music.set_endevent(pygame.USEREVENT + 1)
-            
-            # 监听音乐结束事件
+            # 监听音乐结束 (使用轮询替代事件，以避免依赖视频系统)
             def check_music_end():
                 while self.current_playing == str(file_path):
-                    for event in pygame.event.get():
-                        if event.type == pygame.USEREVENT + 1:
+                    if not pygame.mixer.music.get_busy():
+                        # 音乐停止且current_playing未被清除，说明是自然播放结束
+                        # 二次确认 current_playing，防止竞态条件
+                        if self.current_playing == str(file_path):
                             if next_track_callback:
                                 next_track_callback()
-                            return
+                        return
                     time.sleep(0.1)
 
             threading.Thread(target=check_music_end, daemon=True).start()
@@ -100,12 +100,16 @@ class BellPlayer:
 
     def stop(self):
         """停止当前播放的音频"""
-        if self.pygame_initialized and pygame.mixer.music.get_busy():
+        if self.pygame_initialized:
             try:
-                pygame.mixer.music.stop()
-                if self.current_playing:
-                    logger.info(f"停止播放: {self.current_playing}")
+                # 先清除当前播放标志，避免触发播放结束回调
+                current = self.current_playing
                 self.current_playing = None
+                
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.stop()
+                    if current:
+                        logger.info(f"停止播放: {current}")
             except Exception as e:
                 logger.error(f"停止音频时发生错误: {e}")
     

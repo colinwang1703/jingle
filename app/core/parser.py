@@ -29,8 +29,32 @@ class BellParser:
         with open(self.config_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
+        in_comment_block = False
         for line_num, raw_line in enumerate(lines, 1):
             line = raw_line.strip()
+            
+            # 1. 如果在块注释中
+            if in_comment_block:
+                if '*/' in line:
+                    in_comment_block = False
+                    line = line.split('*/', 1)[1].strip()
+                else:
+                    continue
+            
+            # 2. 处理行内块注释 /* ... */
+            # 循环移除所有成对的 /* */
+            while '/*' in line and '*/' in line:
+                line = re.sub(r'/\*.*?\*/', '', line, count=1).strip()
+
+            # 3. 处理跨行块注释开始 /* ...
+            if '/*' in line:
+                in_comment_block = True
+                line = line.split('/*', 1)[0].strip()
+            
+            # 4. 处理行注释 //
+            if '//' in line:
+                line = line.split('//', 1)[0].strip()
+
             if not line or line.startswith('#'):
                 continue
 
