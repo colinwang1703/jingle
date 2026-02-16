@@ -15,16 +15,16 @@ from collections import defaultdict
 sys.path.append(os.getcwd())
 
 try:
-    from app.main import BellScheduler
+    from app.core.scheduler import BellScheduler
 except ImportError as e:
-    print(f"错误: 无法导入 app.main。\n详细错误信息: {e}")
+    print(f"错误: 无法导入 app.core.scheduler。\n详细错误信息: {e}")
     print("提示: 如果使用了 sudo，请确保指向虚拟环境的 python，例如: sudo .venv/bin/python configure.py")
     sys.exit(1)
 
 # 配置日志，避免 app.main 的日志干扰太多，但保留错误信息
 # 注意：app.main 导入时已经配置了 logging.basicConfig
 # 我们获取 logger 并根据需要调整
-scheduler_logger = logging.getLogger('app.main')
+scheduler_logger = logging.getLogger('app.core.scheduler')
 
 def get_day_name(day_idx):
     days = {

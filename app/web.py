@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 import os
+import sys
 import re
 from pathlib import Path
+
+# 添加项目根目录到 sys.path，解决导入问题
+# 假设 web.py 位于 project/app/web.py，我们需要 project/
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
+from app.settings import CONFIG_FILE, MEDIA_DIR, ALLOWED_EXTENSIONS, SECRET_KEY, PROJECT_ROOT
 
 # 尝试导入版本号
 try:
@@ -16,19 +23,12 @@ except ImportError:
         VERSION = "Unknown"
 
 app = Flask(__name__)
-app.secret_key = 'jingle_bell_secret_key'
+app.secret_key = SECRET_KEY
 
 # 注入版本号到模板
 @app.context_processor
 def inject_version():
     return dict(version=VERSION)
-
-# 使用 Pathlib 优化路径处理
-APP_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = APP_DIR.parent
-CONFIG_FILE = PROJECT_ROOT / 'config' / 'bells.conf'
-MEDIA_DIR = PROJECT_ROOT / 'music'
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'flac'}
 
 class ConfigParser:
     """Helper class to parse and stringify bells.conf format"""
