@@ -109,6 +109,10 @@ class BellPlayer:
             except Exception as e:
                 logger.error(f"停止音频时发生错误: {e}")
     
+    def is_busy(self) -> bool:
+        """检查播放器是否正在忙碌"""
+        return self.pygame_initialized and pygame.mixer.music.get_busy()
+
     def quit(self):
         """退出音频系统，释放资源"""
         self.stop()
