@@ -8,7 +8,7 @@ from typing import Optional, Dict
 from pathlib import Path
 from app.settings import CONFIG_FILE, MEDIA_DIR
 from app.core.player import BellPlayer
-from app.core.parser import BellParser
+from app.core.versioned_config import VersionedConfigStore, ConfigError
 try:
     from app.version import VERSION
 except ImportError:
@@ -24,7 +24,7 @@ class BellScheduler:
     def __init__(self, config_file=CONFIG_FILE):
         self.config_file = Path(config_file)
         self.player = BellPlayer(MEDIA_DIR)
-        self.parser = BellParser(self.config_file, MEDIA_DIR)
+        self.config_store = VersionedConfigStore(self.config_file, MEDIA_DIR)
         self.bell_entries = []
         self.stop_event = threading.Event()
         self.last_modified = 0
@@ -49,9 +49,13 @@ class BellScheduler:
         self.last_modified = current_modified
         self.last_music_dir_modified = current_music_modified
         
-        self.bell_entries = self.parser.parse()
-        logger.info(f"成功加载 {len(self.bell_entries)} 个铃声配置")
-        return True
+        try:
+            self.bell_entries = self.config_store.load_runtime_entries(strict=False)
+            logger.info(f"成功加载 {len(self.bell_entries)} 个铃声配置")
+            return True
+        except ConfigError as e:
+            logger.error(f"配置加载失败: {e}")
+            return False
 
     def should_play_now(self) -> Optional[Dict]:
         """检查当前时间是否需要播放铃声，优先匹配单点时间，其次匹配时间段"""

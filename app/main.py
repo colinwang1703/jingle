@@ -27,17 +27,34 @@ logger = logging.getLogger(__name__)
 
 def create_sample_config():
     """创建示例配置文件"""
-    sample_content = """# 新铃声配置文件格式:
-# 支持行首可选的周几，例如 (1,5,7) 表示周一、周五和周日播放（1=周一,7=周日）
-# 音频文件可以是单个文件或方括号内的列表，方括号内逗号分隔表示随机选择一首播放
-# 旧格式向后兼容：如果第二字段是持续时长 MM:SS 且后面还有时间点，将被当作持续时长
-# 时间前加 - 表示禁用该时间点
-
-# 示例用法:
-# (1,5,7) [class_bell.mp3, class_bell_alt.mp3], 08:00, 12:00
-# [break_bell.mp3], 10:00
-# bed_up_bell.mp3, 07:50
-# 3.mp3, 00:45, -08:30, 15:00  # 兼容旧格式：持续30秒，08:30 被禁用
+    sample_content = """{
+  "version": "v1",
+  "collections": {
+    "class_bells": [
+      "class_bell.mp3",
+      "class_bell_alt.mp3"
+    ]
+  },
+  "presets": {
+    "every_hour": {
+      "mode": "all_day",
+      "days": [],
+      "start": "08:00",
+      "end": "18:00",
+      "interval_minutes": 60
+    }
+  },
+  "entries": [
+    {
+      "preset": "every_hour",
+      "days": [],
+      "times": [],
+      "sources": [
+        "@class_bells"
+      ]
+    }
+  ]
+}
 """
     
     with open('bells.conf', 'w', encoding='utf-8') as f:

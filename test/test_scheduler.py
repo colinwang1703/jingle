@@ -7,10 +7,10 @@ from app.core.scheduler import BellScheduler
 
 class TestBellScheduler(unittest.TestCase):
     @patch('app.core.scheduler.BellPlayer')
-    @patch('app.core.scheduler.BellParser')
-    def setUp(self, MockParser, MockPlayer):
+    @patch('app.core.scheduler.VersionedConfigStore')
+    def setUp(self, MockStore, MockPlayer):
         self.scheduler = BellScheduler()
-        self.mock_parser = MockParser.return_value
+        self.mock_store = MockStore.return_value
         self.mock_player = MockPlayer.return_value
         
         # Setup some default bell entries

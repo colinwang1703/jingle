@@ -1,557 +1,305 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Jingle Bell Config</title>
+    <title>Jingle Config</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Vue 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1, h2 { margin-top: 0; color: #333; }
-        .description { color: #666; margin-bottom: 1rem; }
-        
-        /* Card Styles */
-        .card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background: white;
-            overflow: hidden;
-            transition: box-shadow 0.2s;
-        }
-        .card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        }
-        .card-header {
-            padding: 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-        .card-header:hover {
-            background: #f1f3f5;
-        }
-        .card-body {
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-        .card-title {
-            font-weight: 600;
-            font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .badge {
-            background: #e9ecef;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            color: #495057;
-        }
-        
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .checkbox-label:hover {
-            background: #f8f9fa;
-        }
-        .checkbox-label.checked {
-            background: #e7f5ff;
-            border-color: #74c0fc;
-            color: #1971c2;
-        }
-        input[type="checkbox"] {
-            display: none;
-        }
-        
-        /* Time Input */
-        .time-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .time-tag {
-            background: #e9ecef;
-            padding: 4px 10px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .time-tag button {
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            padding: 0;
-            font-size: 1.2em;
-            line-height: 1;
-        }
-        .time-tag button:hover {
-            color: #dc3545;
-        }
-        .add-time-form {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-        
-        /* Buttons */
-        .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .btn-secondary:hover { background-color: #5a6268; }
-        .btn-sm { padding: 4px 8px; font-size: 12px; }
-        .btn-outline { background: transparent; border: 1px solid #ddd; color: #666; }
-        .btn-outline:hover { background: #f8f9fa; }
-        
-        /* Music Select */
-        .music-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        /* Notifications */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 4px;
-            color: white;
-            z-index: 1000;
-            animation: slideIn 0.3s;
-        }
-        .toast-success { background: #28a745; }
-        .toast-error { background: #dc3545; }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            background: #f5f5f5;
-            padding: 10px 0;
-            z-index: 100;
-        }
+        body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; margin: 0; background: #f3f6fb; color: #1f2a37; }
+        #app { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .card { background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+        h1 { margin: 0 0 10px 0; font-size: 1.35rem; }
+        h2 { margin: 0 0 10px 0; font-size: 1.1rem; }
+        .row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+        .list { border: 1px solid #e7eaf0; border-radius: 8px; padding: 10px; max-height: 220px; overflow: auto; background: #fafcff; }
+        .chip { display: inline-flex; align-items: center; gap: 6px; background: #e9f2ff; border-radius: 999px; padding: 2px 10px; margin: 0 6px 6px 0; }
+        input, select, textarea { width: 100%; box-sizing: border-box; border: 1px solid #cfd8e3; border-radius: 8px; padding: 8px 10px; }
+        button { border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #1769ff; color: #fff; }
+        .btn-danger { background: #d93025; color: #fff; }
+        .btn-soft { background: #eef3ff; color: #1947a4; }
+        .inline { display: flex; gap: 8px; align-items: center; }
+        .warn { color: #a16207; }
+        .err { color: #b91c1c; }
+        .ok { color: #15803d; }
+        .muted { color: #64748b; font-size: .9em; }
+        .footer { text-align: center; color: #7b8794; font-size: .82em; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Config Section -->
-        <div class="container">
-            <div class="section-header">
-                <h1>📝 铃声配置 (Configuration)</h1>
-            </div>
-            
-            <div class="action-bar">
-                <button class="btn btn-primary" @click="addEntry">➕ 新建条目 (New Entry)</button>
-                <button class="btn btn-primary" @click="saveConfig" :disabled="saving">
-                    [[ saving ? '💾 保存中...' : '💾 保存配置 (Save Config)' ]]
-                </button>
-            </div>
-
-            <div v-if="entries.length === 0" style="text-align: center; color: #999; padding: 40px;">
-                暂无配置条目，请点击上方按钮新建。
-            </div>
-
-            <div v-for="(entry, index) in entries" :key="index" class="card">
-                <div class="card-header" @click="toggleExpand(index)">
-                    <div class="card-title">
-                        <span v-if="entry.expanded">🔽</span>
-                        <span v-else>▶️</span>
-                        <span>[[ getSummary(entry) ]]</span>
-                    </div>
-                    <div class="card-actions" @click.stop>
-                        <button class="btn btn-sm btn-outline" @click="copyEntry(index)">📋 复制</button>
-                        <button class="btn btn-sm btn-danger" @click="deleteEntry(index)">🗑️ 删除</button>
-                    </div>
-                </div>
-                
-                <div class="card-body" v-if="entry.expanded">
-                    <!-- Days Selection -->
-                    <div class="form-group">
-                        <label class="form-label">📅 播放日期 (Days)</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label" :class="{checked: entry.days.length === 0}" @click="entry.days = []">
-                                🔄 每天 (Everyday)
-                            </label>
-                            <label v-for="d in 7" :key="d" 
-                                   class="checkbox-label" 
-                                   :class="{checked: entry.days.includes(d)}"
-                                   @click="toggleDay(entry, d)">
-                                [[ getDayName(d) ]]
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Time Points -->
-                    <div class="form-group">
-                        <label class="form-label">⏰ 播放时间 (Times)</label>
-                        <div class="add-time-form">
-                            <input type="time" v-model="entry.tempTime" class="form-control" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button class="btn btn-sm btn-secondary" @click="addTime(entry)">➕ 添加</button>
-                        </div>
-                        <div class="time-tags">
-                            <span v-for="(t, tIdx) in entry.times" :key="tIdx" class="time-tag">
-                                [[ t ]]
-                                <button @click="removeTime(entry, tIdx)">×</button>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Music Selection -->
-                    <div class="form-group">
-                        <label class="form-label">🎵 选择音乐 (Music) - 可多选或输入通配符 (如 jazz_*)</label>
-                        
-                        <!-- Manual Entry Input -->
-                        <div class="add-time-form" style="margin-bottom: 10px;">
-                            <input type="text" v-model="entry.tempFile" class="form-control" placeholder="输入文件名或通配符..." style="padding: 6px; border: 1px solid #ddd; border-radius: 4px; flex-grow: 1;">
-                            <button class="btn btn-sm btn-secondary" @click="addFile(entry)">➕ 添加</button>
-                        </div>
-
-                        <!-- Selected Files Tags -->
-                        <div class="time-tags" style="margin-bottom: 10px;">
-                            <span v-for="(fn, fnIdx) in entry.filenames" :key="fnIdx" class="time-tag" :style="!musicFiles.includes(fn) ? 'background: #fff3cd; color: #856404;' : ''">
-                                [[ fn ]]
-                                <button @click="removeFile(entry, fnIdx)">×</button>
-                            </span>
-                        </div>
-
-                        <div class="music-grid">
-                            <label v-for="file in musicFiles" :key="file" 
-                                   class="checkbox-label" 
-                                   :class="{checked: entry.filenames.includes(file)}">
-                                <input type="checkbox" :value="file" v-model="entry.filenames">
-                                [[ file ]]
-                            </label>
-                        </div>
-                        <div v-if="entry.filenames.length === 0" style="color: #dc3545; font-size: 0.9em; margin-top: 5px;">
-                            ⚠️ 请至少选择一个音乐文件
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Music Manager Section (Keep simplified version for upload/delete) -->
-        <div class="container">
-            <div class="section-header">
-                <h1>🎵 音乐文件管理 (Music Files)</h1>
-            </div>
-            
-            <div class="upload-form" style="margin-bottom: 20px;">
-                <form action="/upload" method="post" enctype="multipart/form-data" style="display: flex; gap: 10px;">
-                    <input type="file" name="file" accept=".mp3,.wav,.ogg,.flac" required multiple>
-                    <button type="submit" class="btn btn-sm btn-primary">⬆️ 上传音乐</button>
-                </form>
-            </div>
-            
-            <!-- Flash Messages -->
-             {% with messages = get_flashed_messages(with_categories=true) %}
-               {% if messages %}
-                 {% for category, message in messages %}
-                   <div style="padding: 10px; border-radius: 4px; margin-bottom: 10px; 
-                               {% if category == 'error' %}background-color: #f8d7da; color: #721c24;
-                               {% elif category == 'success' %}background-color: #d4edda; color: #155724;
-                               {% else %}background-color: #cce5ff; color: #004085;{% endif %}">
-                       {{ message }}
-                   </div>
-                 {% endfor %}
-               {% endif %}
-             {% endwith %}
-
-            <div class="music-grid">
-                <div v-for="file in musicFiles" :key="file" style="display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid #eee;">
-                    <span>📄 [[ file ]]</span>
-                    <form :action="'/delete/' + file" method="post" onsubmit="return confirm('确定要删除吗？');" style="margin:0;">
-                        <button type="submit" class="btn btn-sm btn-danger">删除</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Raw Editor Section -->
-        <div class="container">
-            <div class="section-header">
-                <h1>📝 源码编辑 (Raw Editor)</h1>
-            </div>
-            <div class="card">
-                <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">
-                    直接编辑 bells.conf 配置文件。保存时会自动检查基本语法。
-                </p>
-                <textarea v-model="rawConfig" style="width: 100%; height: 300px; font-family: monospace; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" spellcheck="false"></textarea>
-                <div style="margin-top: 10px; text-align: right;">
-                    <button @click="saveRawConfig" class="btn btn-primary" :disabled="saving">
-                        💾 保存源码 (Save Raw Config)
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Toast Notification -->
-        <div v-if="toast.show" class="toast" :class="toast.type === 'success' ? 'toast-success' : 'toast-error'">
-            [[ toast.message ]]
-        </div>
-
-        <div style="text-align: center; margin-top: 30px; color: #888; font-size: 0.8em; padding-bottom: 20px;">
-            Jingle Bell Scheduler v{{ version }}
+<div id="app">
+    <div class="card">
+        <h1>🔔 Jingle 配置中心</h1>
+        <div class="inline">
+            <button class="btn-primary" @click="addEntry">➕ 新建条目</button>
+            <button class="btn-primary" @click="saveConfig" :disabled="saving">💾 保存配置</button>
+            <span class="muted">版本字段会强制为 [[ payload.version ]]</span>
         </div>
     </div>
 
-    <script>
-        const { createApp, ref, reactive } = Vue;
+    <div class="card">
+        <h2>✅ 实时校验与日程预览</h2>
+        <div v-if="validation.errors.length === 0" class="ok">未发现结构错误</div>
+        <div v-for="(err, idx) in validation.errors" :key="'e'+idx" class="err">• [[ err ]]</div>
+        <div v-for="(warn, idx) in validation.warnings" :key="'w'+idx" class="warn">• [[ warn ]]</div>
+        <div class="muted" style="margin-top:8px;">预览（周1-周7）</div>
+        <div class="row" style="margin-top:8px;">
+            <div v-for="d in 7" :key="'p'+d" class="list">
+                <div><strong>周[[ d ]]</strong></div>
+                <div v-if="(validation.preview[String(d)] || []).length===0" class="muted">无任务</div>
+                <div v-for="t in (validation.preview[String(d)] || [])" :key="t">[[ t ]]</div>
+            </div>
+        </div>
+    </div>
 
-        const app = createApp({
-            setup() {
-                // Initialize data from server template
-                const entries = ref({{ entries | tojson }});
-                const musicFiles = ref({{ music_files | tojson }});
-                const rawConfig = ref({{ raw_content | tojson }});
-                const saving = ref(false);
-                const toast = reactive({ show: false, message: '', type: 'success' });
+    <div class="card">
+        <h2>🎵 收藏集（可复用歌曲池）</h2>
+        <div class="row">
+            <div>
+                <div class="inline">
+                    <input v-model="newCollectionName" placeholder="收藏集名称（如 morning_mix）">
+                    <button class="btn-soft" @click="createCollection">创建</button>
+                </div>
+            </div>
+        </div>
+        <div v-for="(sources, name) in payload.collections" :key="name" class="card" style="padding:10px;margin-top:10px;">
+            <div class="inline">
+                <strong>@[[ name ]]</strong>
+                <button class="btn-danger" @click="removeCollection(name)">删除</button>
+            </div>
+            <div class="list" style="margin-top:8px;">
+                <span v-for="(src, idx) in sources" :key="idx" class="chip">[[ src ]] <button @click="sources.splice(idx,1)">×</button></span>
+            </div>
+            <div class="inline" style="margin-top:8px;">
+                <input v-model="collectionDraft[name]" placeholder="文件名或通配符 (*.mp3)">
+                <button class="btn-soft" @click="addCollectionSource(name)">添加</button>
+            </div>
+        </div>
+    </div>
 
-                // Initialize expansion state
-                entries.value.forEach(e => {
-                    e.expanded = false;
-                    e.tempTime = '';
-                    e.tempFile = '';
-                });
+    <div class="card">
+        <h2>🧩 预设（支持全天日程）</h2>
+        <div class="inline">
+            <input v-model="newPresetName" placeholder="预设名称（如 every_hour）">
+            <select v-model="newPresetMode">
+                <option value="times">固定时间</option>
+                <option value="all_day">全天间隔</option>
+            </select>
+            <button class="btn-soft" @click="createPreset">创建</button>
+        </div>
+        <div v-for="(preset, name) in payload.presets" :key="name" class="card" style="padding:10px;margin-top:10px;">
+            <div class="inline">
+                <strong>[[ name ]]</strong>
+                <select v-model="preset.mode">
+                    <option value="times">times</option>
+                    <option value="all_day">all_day</option>
+                </select>
+                <button class="btn-danger" @click="removePreset(name)">删除</button>
+            </div>
+            <div class="muted" style="margin-top:8px;">days（逗号分隔，留空=每天）</div>
+            <input :value="(preset.days || []).join(',')" @input="preset.days=parseDaysText($event.target.value)">
+            <template v-if="preset.mode==='times'">
+                <div class="muted" style="margin-top:8px;">times（逗号分隔，可含 08:00-09:00）</div>
+                <input :value="(preset.times || []).join(',')" @input="preset.times=parseListText($event.target.value)">
+            </template>
+            <template v-else>
+                <div class="row" style="margin-top:8px;">
+                    <div><div class="muted">start</div><input v-model="preset.start" placeholder="00:00"></div>
+                    <div><div class="muted">end</div><input v-model="preset.end" placeholder="23:59"></div>
+                    <div><div class="muted">interval_minutes</div><input v-model.number="preset.interval_minutes" type="number" min="1" max="1440"></div>
+                </div>
+            </template>
+        </div>
+    </div>
 
-                const showToast = (msg, type = 'success') => {
-                    toast.message = msg;
-                    toast.type = type;
-                    toast.show = true;
-                    setTimeout(() => toast.show = false, 3000);
-                };
+    <div class="card">
+        <h2>📅 调度条目</h2>
+        <div v-if="payload.entries.length===0" class="muted">暂无条目</div>
+        <div v-for="(entry, idx) in payload.entries" :key="idx" class="card" style="padding:10px;margin-top:10px;">
+            <div class="inline">
+                <strong>条目 #[[ idx+1 ]]</strong>
+                <button class="btn-danger" @click="payload.entries.splice(idx,1)">删除</button>
+            </div>
+            <div class="row" style="margin-top:8px;">
+                <div>
+                    <div class="muted">preset（可选）</div>
+                    <select v-model="entry.preset">
+                        <option value="">(无)</option>
+                        <option v-for="(_, name) in payload.presets" :key="name" :value="name">[[ name ]]</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="muted">days（逗号分隔，留空=每天）</div>
+                    <input :value="(entry.days || []).join(',')" @input="entry.days=parseDaysText($event.target.value)">
+                </div>
+            </div>
+            <div class="muted" style="margin-top:8px;">times（逗号分隔，可含 -08:00 或 08:00-08:30）</div>
+            <input :value="(entry.times || []).join(',')" @input="entry.times=parseListText($event.target.value)">
+            <div class="muted" style="margin-top:8px;">sources（逗号分隔，可直接写文件，或 @收藏集）</div>
+            <input :value="(entry.sources || []).join(',')" @input="entry.sources=parseListText($event.target.value)">
+            <div class="list" style="margin-top:8px;">
+                <span v-for="c in Object.keys(payload.collections)" :key="c" class="chip">
+                    @[[ c ]] <button @click="appendSource(entry, '@'+c)">引用</button>
+                </span>
+                <span v-for="f in musicFiles" :key="f" class="chip">
+                    [[ f ]] <button @click="appendSource(entry, f)">添加</button>
+                </span>
+            </div>
+        </div>
+    </div>
 
-                const getDayName = (d) => {
-                    const map = {1:'周一', 2:'周二', 3:'周三', 4:'周四', 5:'周五', 6:'周六', 7:'周日'};
-                    return map[d];
-                };
+    <div class="card">
+        <h2>🎵 音乐文件管理（支持批量上传）</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data" class="inline">
+            <input type="file" name="file" accept=".mp3,.wav,.ogg,.flac" required multiple>
+            <button type="submit" class="btn-primary">上传</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="margin-top:8px;" class="{{ 'err' if category == 'error' else 'ok' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="list" style="margin-top:8px;">
+            <div v-for="file in musicFiles" :key="file" class="inline" style="justify-content:space-between;">
+                <span>[[ file ]]</span>
+                <form :action="'/delete/' + file" method="post" onsubmit="return confirm('确定要删除吗？');">
+                    <button type="submit" class="btn-danger">删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-                const toggleDay = (entry, day) => {
-                    const idx = entry.days.indexOf(day);
-                    if (idx > -1) {
-                        entry.days.splice(idx, 1);
-                    } else {
-                        entry.days.push(day);
-                        entry.days.sort((a,b) => a-b);
-                    }
-                };
+    <div class="card">
+        <h2>📝 原始配置编辑（JSON v1）</h2>
+        <textarea v-model="rawConfig" rows="10" spellcheck="false"></textarea>
+        <div class="inline" style="margin-top:8px;">
+            <button class="btn-primary" @click="saveRawConfig">保存源码</button>
+        </div>
+    </div>
 
-                const addTime = (entry) => {
-                    if (entry.tempTime && !entry.times.includes(entry.tempTime)) {
-                        entry.times.push(entry.tempTime);
-                        entry.times.sort();
-                        entry.tempTime = '';
-                    }
-                };
+    <div class="footer">Jingle v{{ version }}</div>
+</div>
 
-                const removeTime = (entry, idx) => {
-                    entry.times.splice(idx, 1);
-                };
-
-                const addFile = (entry) => {
-                    if (entry.tempFile && !entry.filenames.includes(entry.tempFile)) {
-                        entry.filenames.push(entry.tempFile);
-                        entry.tempFile = '';
-                    }
-                };
-
-                const removeFile = (entry, idx) => {
-                    entry.filenames.splice(idx, 1);
-                };
-
-                const getSummary = (entry) => {
-                    let days = '每天';
-                    if (entry.days.length > 0) {
-                        days = entry.days.map(getDayName).join(', ');
-                    }
-                    
-                    const files = entry.filenames.length > 0 
-                        ? (entry.filenames.length > 1 ? `[${entry.filenames.length}首曲目]` : entry.filenames[0])
-                        : '[无音乐]';
-                        
-                    const timeCount = entry.times.length;
-                    const times = timeCount > 0 ? `${timeCount}个时间点` : '无时间点';
-                    
-                    return `${days} • ${files} • ${times}`;
-                };
-
-                const toggleExpand = (idx) => {
-                    entries.value[idx].expanded = !entries.value[idx].expanded;
-                };
-
-                const addEntry = () => {
-                    entries.value.unshift({
-                        days: [],
-                        filenames: [],
-                        times: [],
-                        duration: null,
-                        expanded: true,
-                        tempTime: '',
-                        tempFile: ''
-                    });
-                };
-
-                const deleteEntry = (idx) => {
-                    if(confirm('确定要删除这个配置条目吗？')) {
-                        entries.value.splice(idx, 1);
-                    }
-                };
-                
-                const copyEntry = (idx) => {
-                    const original = entries.value[idx];
-                    const copy = JSON.parse(JSON.stringify(original));
-                    copy.expanded = true; // Auto expand copy
-                    entries.value.splice(idx + 1, 0, copy);
-                    showToast('条目已复制');
-                };
-
-                const saveConfig = async () => {
-                    saving.value = true;
-                    try {
-                        const response = await fetch('/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ entries: entries.value })
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            showToast('配置保存成功！');
-                            // Refresh page to sync raw config
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            showToast('保存失败: ' + result.message, 'error');
-                        }
-                    } catch (e) {
-                        showToast('网络错误: ' + e, 'error');
-                    } finally {
-                        saving.value = false;
-                    }
-                };
-
-                const saveRawConfig = async () => {
-                    saving.value = true;
-                    try {
-                        const response = await fetch('/save_raw', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ content: rawConfig.value })
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            showToast('源码保存成功！');
-                            // Refresh page to sync visual editor
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            showToast('保存失败: ' + result.message, 'error');
-                        }
-                    } catch (e) {
-                        showToast('网络错误: ' + e, 'error');
-                    } finally {
-                        saving.value = false;
-                    }
-                };
-
-                return {
-                    entries,
-                    musicFiles,
-                    rawConfig,
-                    saving,
-                    toast,
-                    getDayName,
-                    toggleDay,
-                    addTime,
-                    removeTime,
-                    addFile,
-                    removeFile,
-                    getSummary,
-                    toggleExpand,
-                    addEntry,
-                    deleteEntry,
-                    copyEntry,
-                    saveConfig,
-                    saveRawConfig
-                };
-            }
+<script>
+const { createApp, ref, reactive, watch } = Vue;
+const app = createApp({
+    setup() {
+        const payload = ref({{ payload | tojson }});
+        const musicFiles = ref({{ music_files | tojson }});
+        const rawConfig = ref({{ raw_content | tojson }});
+        const saving = ref(false);
+        const validation = reactive({
+            errors: {{ validation_errors | tojson }},
+            warnings: {{ validation_warnings | tojson }},
+            preview: {{ schedule_preview | tojson }},
         });
 
-        // Change Vue delimiters to avoid conflict with Jinja2
-        app.config.compilerOptions.delimiters = ['[[', ']]'];
-        app.mount('#app');
-    </script>
+        const newCollectionName = ref('');
+        const collectionDraft = reactive({});
+        const newPresetName = ref('');
+        const newPresetMode = ref('times');
+        let validationTimer = null;
+
+        const parseListText = (text) => text.split(',').map(v => v.trim()).filter(Boolean);
+        const parseDaysText = (text) => parseListText(text).map(v => parseInt(v, 10)).filter(v => !isNaN(v));
+
+        const addEntry = () => payload.value.entries.unshift({ preset: '', days: [], times: [], sources: [] });
+        const appendSource = (entry, source) => {
+            entry.sources = entry.sources || [];
+            if (!entry.sources.includes(source)) entry.sources.push(source);
+        };
+
+        const createCollection = () => {
+            const name = newCollectionName.value.trim();
+            if (!name) return;
+            if (!payload.value.collections[name]) payload.value.collections[name] = [];
+            newCollectionName.value = '';
+        };
+        const removeCollection = (name) => {
+            delete payload.value.collections[name];
+            payload.value.entries.forEach(e => e.sources = (e.sources || []).filter(s => s !== '@' + name));
+        };
+        const addCollectionSource = (name) => {
+            const value = (collectionDraft[name] || '').trim();
+            if (!value) return;
+            const target = payload.value.collections[name];
+            if (!target.includes(value)) target.push(value);
+            collectionDraft[name] = '';
+        };
+
+        const createPreset = () => {
+            const name = newPresetName.value.trim();
+            if (!name) return;
+            if (newPresetMode.value === 'all_day') {
+                payload.value.presets[name] = { mode: 'all_day', days: [], start: '00:00', end: '23:59', interval_minutes: 60 };
+            } else {
+                payload.value.presets[name] = { mode: 'times', days: [], times: [] };
+            }
+            newPresetName.value = '';
+        };
+        const removePreset = (name) => {
+            delete payload.value.presets[name];
+            payload.value.entries.forEach(e => { if (e.preset === name) e.preset = ''; });
+        };
+
+        const saveConfig = async () => {
+            saving.value = true;
+            try {
+                const body = JSON.stringify(payload.value);
+                const res = await fetch('/', { method: 'POST', headers: {'Content-Type':'application/json'}, body });
+                const data = await res.json();
+                if (!data.success) alert(data.message || '保存失败');
+                else location.reload();
+            } finally {
+                saving.value = false;
+            }
+        };
+
+        const saveRawConfig = async () => {
+            const res = await fetch('/save_raw', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ content: rawConfig.value })
+            });
+            const data = await res.json();
+            if (!data.success) alert(data.message || '保存失败');
+            else location.reload();
+        };
+
+        const triggerValidate = () => {
+            if (validationTimer) clearTimeout(validationTimer);
+            validationTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/validate', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(payload.value)
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        validation.errors = data.errors || [];
+                        validation.warnings = data.warnings || [];
+                        validation.preview = data.preview || {};
+                    }
+                } catch (e) {}
+            }, 300);
+        };
+        watch(payload, triggerValidate, { deep: true });
+
+        return {
+            payload, musicFiles, rawConfig, saving, validation,
+            newCollectionName, collectionDraft, newPresetName, newPresetMode,
+            parseListText, parseDaysText, addEntry, appendSource,
+            createCollection, removeCollection, addCollectionSource,
+            createPreset, removePreset, saveConfig, saveRawConfig
+        };
+    }
+});
+app.config.compilerOptions.delimiters = ['[[', ']]'];
+app.mount('#app');
+</script>
 </body>
 </html>
